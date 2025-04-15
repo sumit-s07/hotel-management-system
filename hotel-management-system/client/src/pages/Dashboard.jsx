@@ -6,7 +6,7 @@ import {
   MonetizationOn as RevenueIcon,
 } from '@mui/icons-material';
 import { useState, useEffect } from 'react';
-import { getDashboardStats } from '../services/dashboard.api';
+import { getDashboardStats, getRecentBookings } from '../services/dashboard.api';
 import moment from 'moment';
 
 const StatCard = ({ title, value, icon, color }) => (
@@ -30,14 +30,22 @@ const StatCard = ({ title, value, icon, color }) => (
 );
 
 export default function Dashboard() {
-  const [dashboardData, setDashboardData] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [recentBookings, setRecentBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getDashboardStats();
-        setDashboardData(data);
+        console.log('Fetching dashboard data...');
+        const [statsData, bookings] = await Promise.all([
+          getDashboardStats(),
+          getRecentBookings()
+        ]);
+        console.log('Received stats data:', statsData);
+        console.log('Received bookings:', bookings);
+        setStats(statsData);
+        setRecentBookings(bookings);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -59,15 +67,13 @@ export default function Dashboard() {
     );
   }
 
-  if (!dashboardData?.stats) {
+  if (!stats) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
         <Typography variant="h6">No data available</Typography>
       </Box>
     );
   }
-
-  const { stats, recentBookings } = dashboardData;
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -80,7 +86,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={4}>
           <StatCard
             title="Total Rooms"
-            value={stats.totalRooms}
+            value={stats.totalRooms || 0}
             icon={<HotelIcon />}
             color="#1976d2"
           />
@@ -88,7 +94,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={4}>
           <StatCard
             title="Occupied Rooms"
-            value={stats.occupiedRooms}
+            value={stats.occupiedRooms || 0}
             icon={<HotelIcon />}
             color="#2196f3"
           />
@@ -96,7 +102,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={4}>
           <StatCard
             title="Available Rooms"
-            value={stats.availableRooms}
+            value={stats.availableRooms || 0}
             icon={<HotelIcon />}
             color="#64b5f6"
           />
@@ -106,7 +112,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={4}>
           <StatCard
             title="Total Bookings"
-            value={stats.totalBookings}
+            value={stats.totalBookings || 0}
             icon={<BookingIcon />}
             color="#388e3c"
           />
@@ -114,7 +120,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={4}>
           <StatCard
             title="Pending Bookings"
-            value={stats.pendingBookings}
+            value={stats.pendingBookings || 0}
             icon={<BookingIcon />}
             color="#4caf50"
           />
@@ -122,7 +128,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={4}>
           <StatCard
             title="Confirmed Bookings"
-            value={stats.confirmedBookings}
+            value={stats.confirmedBookings || 0}
             icon={<BookingIcon />}
             color="#81c784"
           />
@@ -132,7 +138,7 @@ export default function Dashboard() {
         <Grid item xs={12} md={6}>
           <StatCard
             title="Total Guests"
-            value={stats.totalGuests}
+            value={stats.totalGuests || 0}
             icon={<PersonIcon />}
             color="#7b1fa2"
           />
@@ -140,27 +146,9 @@ export default function Dashboard() {
         <Grid item xs={12} md={6}>
           <StatCard
             title="Current Guests"
-            value={stats.currentGuests}
+            value={stats.currentGuests || 0}
             icon={<PersonIcon />}
             color="#9c27b0"
-          />
-        </Grid>
-
-        {/* Revenue Statistics */}
-        <Grid item xs={12} md={6}>
-          <StatCard
-            title="Monthly Revenue"
-            value={`₹${stats.monthlyRevenue.toLocaleString()}`}
-            icon={<RevenueIcon />}
-            color="#fdd835"
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <StatCard
-            title="Yearly Revenue"
-            value={`₹${stats.yearlyRevenue.toLocaleString()}`}
-            icon={<RevenueIcon />}
-            color="#f57c00"
           />
         </Grid>
 
@@ -171,7 +159,7 @@ export default function Dashboard() {
               Recent Bookings
             </Typography>
             <Grid container spacing={2}>
-              {recentBookings?.map((booking) => (
+              {recentBookings.map((booking) => (
                 <Grid item xs={12} key={booking._id}>
                   <Paper
                     sx={{

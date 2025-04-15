@@ -46,13 +46,17 @@ exports.getBooking = async (req, res) => {
 // Create new booking
 exports.createBooking = async (req, res) => {
     try {
-        const { room, checkIn, checkOut, numberOfGuests } = req.body;
+        const { room, checkIn, checkOut, numberOfGuests, guestName, guestEmail, guestPhone, specialRequests } = req.body;
         
-        // Validate dates
-        if (!checkIn || !checkOut) {
-            return res.status(400).json({ message: 'Check-in and check-out dates are required' });
+        // Validate required fields
+        if (!room || !checkIn || !checkOut || !guestName || !guestEmail || !guestPhone) {
+            return res.status(400).json({ 
+                message: 'Missing required fields',
+                required: ['room', 'checkIn', 'checkOut', 'guestName', 'guestEmail', 'guestPhone']
+            });
         }
 
+        // Validate dates
         const checkInDate = moment(checkIn);
         const checkOutDate = moment(checkOut);
 
@@ -91,17 +95,35 @@ exports.createBooking = async (req, res) => {
         const nights = checkOutDate.diff(checkInDate, 'days');
         const totalPrice = nights * roomDoc.pricePerNight;
 
+        // Create booking with user ID
         const booking = new Booking({
-            ...req.body,
+            room,
+            guestName,
+            guestEmail,
+            guestPhone,
+            checkIn: checkInDate.toDate(),
+            checkOut: checkOutDate.toDate(),
+            numberOfGuests,
+            totalPrice,
             status: 'pending',
-            totalPrice
+            paymentStatus: 'pending',
+            bookingSource: 'website',
+            specialRequests,
+            userId: req.user._id
         });
 
         await booking.save();
+        
+        // Send confirmation email
+        await sendBookingConfirmation(booking);
+
         res.status(201).json(booking);
     } catch (error) {
         console.error('Error creating booking:', error);
-        res.status(500).json({ message: 'Error creating booking', error: error.message });
+        res.status(500).json({ 
+            message: 'Error creating booking', 
+            error: error.message 
+        });
     }
 };
 

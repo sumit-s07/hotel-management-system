@@ -52,7 +52,7 @@ export const verifyBooking = (id) => api.post(`/bookings/${id}/verify`);
 export const rejectBooking = (id, reason) => api.post(`/bookings/${id}/reject`, { reason });
 
 // Dashboard services
-export const getDashboardStats = () => api.get('/bookings/stats');
+export const getDashboardStats = () => api.get('/dashboard/stats');
 
 // Room services
 export const getRooms = (filters = {}) => api.get('/rooms', { params: filters });

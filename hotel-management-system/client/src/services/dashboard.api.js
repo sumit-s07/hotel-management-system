@@ -2,7 +2,7 @@ import api from './api';
 
 export const getDashboardStats = async () => {
     try {
-        const response = await api.get('/dashboard/stats');
+        const response = await api.get('/stats');
         return response.data;
     } catch (error) {
         console.error('Error fetching dashboard stats:', error.response?.data || error.message);
@@ -15,7 +15,7 @@ export const getRecentBookings = async () => {
         const response = await api.get('/bookings', {
             params: {
                 limit: 10,
-                sort: '-createdAt'
+                sort: { createdAt: -1 }  
             }
         });
         return response.data;

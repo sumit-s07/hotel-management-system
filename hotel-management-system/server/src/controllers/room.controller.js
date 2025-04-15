@@ -37,7 +37,13 @@ exports.getRoom = async (req, res) => {
 // Create a new room
 exports.createRoom = async (req, res) => {
     try {
-        const room = new Room(req.body);
+        // Add userId from auth middleware
+        const roomData = {
+            ...req.body,
+            userId: req.user._id
+        };
+
+        const room = new Room(roomData);
         await room.save();
         res.status(201).json(room);
     } catch (error) {
@@ -45,7 +51,7 @@ exports.createRoom = async (req, res) => {
         if (error.code === 11000) { // Duplicate key error
             return res.status(400).json({ message: 'Room number already exists' });
         }
-        res.status(500).json({ message: 'Error creating room' });
+        res.status(500).json({ message: 'Error creating room', error: error.message });
     }
 };
 
