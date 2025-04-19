@@ -7,7 +7,7 @@ const moment = require('moment');
 exports.getBookings = async (req, res) => {
     try {
         const { status, startDate, endDate, limit, sort } = req.query;
-        const query = {};
+        const query = { userId: req.user._id };
 
         if (status) query.status = status;
         if (startDate && endDate) {
@@ -16,7 +16,7 @@ exports.getBookings = async (req, res) => {
         }
 
         const bookings = await Booking.find(query)
-            .populate('room')
+            .populate('room', 'roomNumber type pricePerNight')
             .sort(sort ? { createdAt: sort } : { createdAt: -1 })
             .limit(limit ? parseInt(limit) : 10);
 
@@ -30,7 +30,7 @@ exports.getBookings = async (req, res) => {
 exports.getBooking = async (req, res) => {
     try {
         const booking = await Booking.findById(req.params.id)
-            .populate('room')
+            .populate('room', 'roomNumber type pricePerNight')
             .populate('verifiedBy', 'name email');
 
         if (!booking) {

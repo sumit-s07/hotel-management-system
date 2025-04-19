@@ -255,7 +255,7 @@ export default function Bookings() {
                 <TableRow key={booking._id}>
                   <TableCell>#{booking._id.slice(-6)}</TableCell>
                   <TableCell>{booking.guestName}</TableCell>
-                  <TableCell>{booking.roomNumber}</TableCell>
+                  <TableCell>{booking.room?.roomNumber || '-'}</TableCell>
                   <TableCell>{moment(booking.checkIn).format('MMM D, YYYY')}</TableCell>
                   <TableCell>{moment(booking.checkOut).format('MMM D, YYYY')}</TableCell>
                   <TableCell>
@@ -318,7 +318,7 @@ export default function Bookings() {
                 <Typography variant="h6" sx={{ mt: 2 }} gutterBottom>
                   Booking Details
                 </Typography>
-                <Typography>Room: {selectedBooking.roomNumber} ({selectedBooking.roomType})</Typography>
+                <Typography>Room: {selectedBooking.room?.roomNumber || '-'} ({selectedBooking.room?.type || '-'})</Typography>
                 <Typography>Check-in: {moment(selectedBooking.checkIn).format('MMMM D, YYYY')}</Typography>
                 <Typography>Check-out: {moment(selectedBooking.checkOut).format('MMMM D, YYYY')}</Typography>
                 <Typography>Guests: {selectedBooking.numberOfGuests}</Typography>
