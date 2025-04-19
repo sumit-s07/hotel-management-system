@@ -143,6 +143,11 @@ exports.verifyBooking = async (req, res) => {
         booking.verificationDate = new Date();
         await booking.save();
 
+        // Also update the room status to 'occupied'
+        if (booking.room && booking.room._id) {
+            await Room.findByIdAndUpdate(booking.room._id, { status: 'occupied' });
+        }
+
         // Send confirmation email
         await sendBookingConfirmation(booking);
 

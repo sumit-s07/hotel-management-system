@@ -56,10 +56,19 @@ router.post('/login', async (req, res) => {
 });
 
 // Get current user profile
+const Hotel = require('../models/hotel.model');
 router.get('/profile', authenticate, async (req, res) => {
     try {
         const user = await User.findById(req.user._id).select('-password');
-        res.json(user);
+        let hotelName = null;
+        const hotel = await Hotel.findOne({ userId: user._id });
+        if (hotel) hotelName = hotel.name;
+        res.json({
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            hotelName
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

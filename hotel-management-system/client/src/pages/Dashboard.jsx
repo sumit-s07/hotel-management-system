@@ -152,6 +152,24 @@ export default function Dashboard() {
           />
         </Grid>
 
+        {/* Revenue Statistics */}
+        <Grid item xs={12} md={6}>
+          <StatCard
+            title="Monthly Revenue"
+            value={`₹${stats.monthlyRevenue || 0}`}
+            icon={<RevenueIcon />}
+            color="#ff9800"
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <StatCard
+            title="Yearly Revenue"
+            value={`₹${stats.yearlyRevenue || 0}`}
+            icon={<RevenueIcon />}
+            color="#ffb300"
+          />
+        </Grid>
+
         {/* Recent Bookings */}
         <Grid item xs={12}>
           <Paper sx={{ p: 3 }}>

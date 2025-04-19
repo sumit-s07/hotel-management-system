@@ -43,7 +43,8 @@ exports.createRoom = async (req, res) => {
         // Add userId from auth middleware
         const roomData = {
             ...req.body,
-            userId: req.user._id
+            userId: req.user._id,
+            status: req.body.status || 'available'
         };
 
         const room = new Room(roomData);

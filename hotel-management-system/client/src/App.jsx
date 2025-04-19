@@ -10,6 +10,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Rooms from './pages/Rooms';
 import Bookings from './pages/Bookings';
+import Profile from './pages/Profile';
+
 
 const theme = createTheme({
   palette: {
@@ -36,15 +38,15 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Layout>
-                      <Routes>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/rooms" element={<Rooms />} />
-                        <Route path="/bookings" element={<Bookings />} />
-                        <Route path="/profile" element={<div>Profile (Coming Soon)</div>} />
-                        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-                      </Routes>
-                    </Layout>
-                  </ProtectedRoute>
+                        <Routes>
+                          <Route path="/dashboard" element={<Dashboard />} />
+                          <Route path="/rooms" element={<Rooms />} />
+                          <Route path="/bookings" element={<Bookings />} />
+                          <Route path="/profile" element={<Profile />} />
+                          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+                        </Routes>
+                      </Layout>
+                    </ProtectedRoute>
                 }
               />
             </Routes>

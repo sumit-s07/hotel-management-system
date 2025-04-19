@@ -6,57 +6,67 @@ exports.getDashboardStats = async (req, res) => {
     try {
         console.log('Fetching dashboard stats...');
         
-        // Get room statistics
+        // Only show data for the signed-in user
+        const userId = req.user._id;
+
+        // Get room statistics for this user
         const [totalRooms, occupiedRooms] = await Promise.all([
-            Room.countDocuments().then(count => {
-                console.log('Total rooms:', count);
+            Room.countDocuments({ userId }).then(count => {
+                console.log('Total rooms (user):', count);
                 return count;
             }),
-            Room.countDocuments({ status: 'occupied' }).then(count => {
-                console.log('Occupied rooms:', count);
+            Room.countDocuments({ userId, status: 'occupied' }).then(count => {
+                console.log('Occupied rooms (user):', count);
                 return count;
             })
         ]);
 
-        // Get booking statistics
+        // Get booking statistics for this user
         const [totalBookings, pendingBookings, confirmedBookings] = await Promise.all([
-            Booking.countDocuments().then(count => {
-                console.log('Total bookings:', count);
+            Booking.countDocuments({ userId }).then(count => {
+                console.log('Total bookings (user):', count);
                 return count;
             }),
-            Booking.countDocuments({ status: 'pending' }).then(count => {
-                console.log('Pending bookings:', count);
+            Booking.countDocuments({ userId, status: 'pending' }).then(count => {
+                console.log('Pending bookings (user):', count);
                 return count;
             }),
-            Booking.countDocuments({ status: 'confirmed' }).then(count => {
-                console.log('Confirmed bookings:', count);
+            Booking.countDocuments({ userId, status: 'confirmed' }).then(count => {
+                console.log('Confirmed bookings (user):', count);
                 return count;
             })
         ]);
 
-        // Get guest statistics
+        // Get guest statistics for this user
         const [totalGuests, currentGuests] = await Promise.all([
-            Booking.countDocuments().then(count => {
-                console.log('Total guests:', count);
+            Booking.countDocuments({ userId }).then(count => {
+                console.log('Total guests (user):', count);
                 return count;
             }),
             Booking.countDocuments({ 
+                userId,
                 status: 'confirmed', 
                 checkOut: { $gt: new Date() }
             }).then(count => {
-                console.log('Current guests:', count);
+                console.log('Current guests (user):', count);
                 return count;
             })
         ]);
 
-        // Calculate revenue
+        // Calculate revenue for this user
         const monthlyRevenue = await Booking.aggregate([
             {
                 $match: {
-                    createdAt: {
-                        $gte: new Date(moment().startOf('month'))
-                    },
-                    status: 'confirmed'
+                    $and: [
+                        {
+                            $or: [
+                                { userId: userId },
+                                { userId: typeof userId === 'object' && userId.toString ? userId.toString() : userId }
+                            ]
+                        },
+                        { createdAt: { $gte: new Date(moment().startOf('month')) } },
+                        { status: 'confirmed' }
+                    ]
                 }
             },
             {
@@ -66,17 +76,23 @@ exports.getDashboardStats = async (req, res) => {
                 }
             }
         ]).then(result => {
-            console.log('Monthly revenue:', result[0]?.total || 0);
+            console.log('Monthly revenue (user):', result[0]?.total || 0);
             return result[0]?.total || 0;
         });
 
         const yearlyRevenue = await Booking.aggregate([
             {
                 $match: {
-                    createdAt: {
-                        $gte: new Date(moment().startOf('year'))
-                    },
-                    status: 'confirmed'
+                    $and: [
+                        {
+                            $or: [
+                                { userId: userId },
+                                { userId: typeof userId === 'object' && userId.toString ? userId.toString() : userId }
+                            ]
+                        },
+                        { createdAt: { $gte: new Date(moment().startOf('year')) } },
+                        { status: 'confirmed' }
+                    ]
                 }
             },
             {
@@ -86,21 +102,22 @@ exports.getDashboardStats = async (req, res) => {
                 }
             }
         ]).then(result => {
-            console.log('Yearly revenue:', result[0]?.total || 0);
+            console.log('Yearly revenue (user):', result[0]?.total || 0);
             return result[0]?.total || 0;
         });
 
-        // Get recent bookings
-        const recentBookings = await Booking.find()
+        // Get recent bookings for this user
+        const recentBookings = await Booking.find({ userId })
             .sort({ createdAt: -1 })
             .limit(10)
             .populate('room', 'roomNumber type pricePerNight')
             .populate('userId', 'name')
             .then(bookings => {
-                console.log('Recent bookings fetched:', bookings.length);
+                console.log('Recent bookings fetched (user):', bookings.length);
                 return bookings;
             });
 
+        // availableRooms is now calculated per user
         res.json({
             totalRooms,
             occupiedRooms,
