@@ -23,12 +23,14 @@ import {
     Logout,
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { useHotel } from '../context/HotelContext.jsx';
 
 const drawerWidth = 240;
 
 export default function Layout({ children }) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const { user, logout } = useAuth();
+    const { hotelName } = useHotel();
     const navigate = useNavigate();
 
     const handleDrawerToggle = () => {
@@ -78,7 +80,7 @@ export default function Layout({ children }) {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-                        Hotel Management System
+                        {user && hotelName ? hotelName : 'Hotel Management System'}
                     </Typography>
                     {user && (
                         <>

@@ -11,6 +11,7 @@ import Dashboard from './pages/Dashboard';
 import Rooms from './pages/Rooms';
 import Bookings from './pages/Bookings';
 import Profile from './pages/Profile';
+import { HotelProvider } from './context/HotelContext.jsx';
 
 
 const theme = createTheme({
@@ -37,7 +38,8 @@ function App() {
                 path="/*"
                 element={
                   <ProtectedRoute>
-                    <Layout>
+                    <HotelProvider>
+                      <Layout>
                         <Routes>
                           <Route path="/dashboard" element={<Dashboard />} />
                           <Route path="/rooms" element={<Rooms />} />
@@ -46,7 +48,8 @@ function App() {
                           <Route path="/" element={<Navigate to="/dashboard" replace />} />
                         </Routes>
                       </Layout>
-                    </ProtectedRoute>
+                    </HotelProvider>
+                  </ProtectedRoute>
                 }
               />
             </Routes>
