@@ -8,8 +8,7 @@ const roomSchema = new mongoose.Schema({
     },
     roomNumber: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     type: {
         type: String,
@@ -45,5 +44,8 @@ roomSchema.pre('save', function(next) {
     }
     next();
 });
+
+// Create a compound unique index on (roomNumber, userId)
+roomSchema.index({ roomNumber: 1, userId: 1 }, { unique: true });
 
 module.exports = mongoose.model('Room', roomSchema);

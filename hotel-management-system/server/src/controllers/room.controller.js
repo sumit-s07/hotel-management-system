@@ -12,6 +12,9 @@ exports.getRooms = async (req, res) => {
         if (status) query.status = status;
         if (floor) query.floor = floor;
 
+        // Only show rooms belonging to the signed-in user
+        query.userId = req.user._id;
+
         const rooms = await Room.find(query);
         res.json(rooms);
     } catch (error) {
