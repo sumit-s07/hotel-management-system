@@ -37,19 +37,28 @@ exports.getDashboardStats = async (req, res) => {
             })
         ]);
 
-        // Get guest statistics for this user
+        // Get guest statistics for this user (sum numberOfGuests)
         const [totalGuests, currentGuests] = await Promise.all([
-            Booking.countDocuments({ userId }).then(count => {
-                console.log('Total guests (user):', count);
-                return count;
+            Booking.aggregate([
+                { $match: { userId } },
+                { $group: { _id: null, total: { $sum: '$numberOfGuests' } } }
+            ]).then(result => {
+                const total = result[0]?.total || 0;
+                console.log('Total guests (user):', total);
+                return total;
             }),
-            Booking.countDocuments({ 
-                userId,
-                status: 'confirmed', 
-                checkOut: { $gt: new Date() }
-            }).then(count => {
-                console.log('Current guests (user):', count);
-                return count;
+            Booking.aggregate([
+                { $match: {
+                    userId,
+                    status: 'confirmed',
+                    checkIn: { $lte: new Date() },
+                    checkOut: { $gt: new Date() }
+                }},
+                { $group: { _id: null, total: { $sum: '$numberOfGuests' } } }
+            ]).then(result => {
+                const total = result[0]?.total || 0;
+                console.log('Current guests (user):', total);
+                return total;
             })
         ]);
 
